@@ -9,7 +9,6 @@
     using System.Reflection;
     using EntityFramework.Metadata;
     using Extensions;
-    using FastMember;
 
     internal static class SqlBulkOperation
     {
@@ -169,9 +168,10 @@
 
                 if (tableInfo.Config.SetOutputIdentity && tableInfo.HasIdentity)
                 {
-                    var accessor = TypeAccessor.Create(typeof(TEntity));
                     string identityPropertyName = tableInfo.IdentityColumn.PropertyName;
                     string identityColumnName = tableInfo.IdentityColumn.PropertyName;
+
+                    var propertyAccessor = typeof(TEntity).GetProperty(identityPropertyName);
 
                     for (int i = 0; i < entities.Count(); i++)
                     {
@@ -180,7 +180,7 @@
                         if ((string)resultRow[SqlQueryBuilder.OutputActionColumnAlias] == SqlQueryBuilder.OutputInsertActionValue)
                         {
                             var entity = entities.ElementAt(i);
-                            accessor[entity, identityPropertyName] = resultRow[identityColumnName];
+                            propertyAccessor.SetValue(entity, resultRow[identityColumnName]);
                         }
                     }
                 }
